@@ -24,9 +24,14 @@ class OilDrop(object):
     rise_d = 0.5/1000               # mm/1000 = m
     plate_separation = 6/1000       # mm/1000 = m
     
-    def __init__(self, fall_time, rise_time, tension):
+    def __init__(self, drop_parameters):
         
-
+        drop_number = int(drop_parameters[0])
+        fall_time = drop_parameters[1]
+        rise_time = drop_parameters[2]
+        tension = drop_parameters[3]
+        
+        self.number = drop_number
         self.fall_t = fall_time             # second
         self.rise_t = rise_time             # second
         self.tension = tension              # Volt
@@ -66,16 +71,25 @@ counter = 1
 drop_avg = []
 added = [0,0,0,0]
 for row in data_table:
-    if row[0] == previous[0]:
-        if row[3] == previous[3]:
-            added = [row[0],row[1] + previous[1], row[2] + previous[2], row[3]]
-            counter += 1
-            previous = added
-        else:
-            previous = row
-            added = row
+    if row[0] == previous[0] and row[3] == previous[3]:
+        added = [row[0],row[1] + previous[1], row[2] + previous[2], row[3]]
+#        print added
+        counter += 1
+        previous = added
+    elif counter>1:
+        added[1] /= counter 
+        added[2] /= counter
+#        print '\n'+str(counter)
+#        print '\n'+str(added)+'\n'
+        drop_avg.append(added)
+        previous = row
+        counter = 1
     else:
-            added[1] /= counter 
-            added[2] /= counter
-            append(drop_avg, added)
-            previous = row
+        drop_avg.append(list(row))
+#        print 'i am here'
+        previous=row
+
+drop_list = []
+for drop in drop_avg:
+#    print drop
+    drop_list.append(OilDrop(drop))
